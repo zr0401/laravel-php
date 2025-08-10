@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 
 class AuthManager extends Controller
@@ -27,10 +28,12 @@ class AuthManager extends Controller
         ]);
 
         $credentials = $request->only('email', 'password');
+
         if(Auth::attempt($credentials)){
             return redirect()->intended(route('welcome'))->with("success", "Login Successful");
         }
         return redirect(route('login'))->with("error", "Login Details are incorrect");
+        Log::error("Login failed: " . $e->getMessage());
     }
 
     function registrationPost(Request $request){
