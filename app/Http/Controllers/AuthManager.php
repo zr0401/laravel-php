@@ -27,13 +27,25 @@ class AuthManager extends Controller
 
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $email = $request->email;
+        $password = $request->password;
 
-        if(Auth::attempt($credentials)){
+        $user = User::where('email', $email)->first();
+
+        if(!$user){
+            Log::error("Incorrect email for " . $request->email);
+            return redirect(route('login'))->with("error", "Login Details are incorrect");
+        }
+
+        if(!Hash::check($password, $user->password)){
+            Log::error("Incorrect password for " . $request->email);
+            return redirect(route('login'))->with("error", "Login Details are incorrect");
+        }
+        else{
+            Auth::login($user);
+            Log::info("User " . $request->email . " logged in successfully.");
             return redirect()->intended(route('welcome'))->with("success", "Login Successful");
         }
-        return redirect(route('login'))->with("error", "Login Details are incorrect");
-        Log::error("Login failed: " . $e->getMessage());
     }
 
     function registrationPost(Request $request){
